@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -33,15 +32,4 @@ func bugCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("Create a new bug\n"))
-}
-
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/bug/view/", bugView)
-	mux.HandleFunc("/bug/create/", bugCreate)
-
-	log.Println("Starting server on: 4000")
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
 }
