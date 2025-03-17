@@ -7,8 +7,8 @@ import (
 
 func main() {
 	mux := http.NewServeMux()
-	// fileServer := http.FileServer(http.Dir("./ui/static/"))
-	// mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	// fileServer := http.FileServer(http.Dir("./ui/html/base.tmpl.html/"))
+	// mux.Handle("/base.tmpl.html/", http.StripPrefix("/base.tmpl.html", fileServer))
 	mux.HandleFunc("/", home)
 	mux.HandleFunc("/bug/view/", bugView)
 	mux.HandleFunc("/bug/create/", bugCreate) 

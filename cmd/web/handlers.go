@@ -8,29 +8,52 @@ import (
 	"strconv"
 )
 
+// Renders a page using base.tmpl.html and a specific page template
+func renderTemplate(w http.ResponseWriter, page string) {
+    files := []string{
+        "./ui/html/base.tmpl.html",      // Base template
+        "./ui/html/pages/" + page + ".tmpl", // Dynamic page template
+    }
+
+    ts, err := template.ParseFiles(files...)
+    if err != nil {
+        log.Println("Template parsing error:", err)
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+
+    err = ts.ExecuteTemplate(w, "base", nil)
+    if err != nil {
+        log.Println("Template execution error:", err)
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+    }
+}
+
 func home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.tmpl.html",
-		"./ui/html/pages/home.tmpl",
-	}
+	renderTemplate(w, "home")
 
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
+	// files := []string{
+	// 	"./ui/html/base.tmpl.html",
+	// 	"./ui/html/pages/home.tmpl",
+	// }
 
-	err = ts.ExecuteTemplate(w, "base.tmpl.html", nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
+	// ts, err := template.ParseFiles(files...)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	http.Error(w, "Internal Server Error", 500)
+	// 	return
+	// }
+
+	// err = ts.ExecuteTemplate(w, "base.tmpl.html", nil)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	http.Error(w, "Internal Server Error", 500)
+	// }
 }
 
 func bugView(w http.ResponseWriter, r *http.Request) {
