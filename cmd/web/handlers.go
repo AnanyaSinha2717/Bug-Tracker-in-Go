@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 )
 
 // Renders a page using base.tmpl.html and a specific page template
-func renderTemplate(w http.ResponseWriter, page string) {
+func (app *application) renderTemplate(w http.ResponseWriter, page string) {
     files := []string{
         "./ui/html/base.tmpl.html",      // Base template
         "./ui/html/pages/" + page + ".tmpl", // Dynamic page template
@@ -17,59 +16,39 @@ func renderTemplate(w http.ResponseWriter, page string) {
 
     ts, err := template.ParseFiles(files...)
     if err != nil {
-        log.Println("Template parsing error:", err)
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        app.serverError(w, err)
         return
     }
 
     err = ts.ExecuteTemplate(w, "base", nil)
     if err != nil {
-        log.Println("Template execution error:", err)
-        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        app.serverError(w, err)
     }
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		app.NotFound(w)
 		return
 	}
 
-	renderTemplate(w, "home")
-
-	// files := []string{
-	// 	"./ui/html/base.tmpl.html",
-	// 	"./ui/html/pages/home.tmpl",
-	// }
-
-	// ts, err := template.ParseFiles(files...)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	http.Error(w, "Internal Server Error", 500)
-	// 	return
-	// }
-
-	// err = ts.ExecuteTemplate(w, "base.tmpl.html", nil)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	http.Error(w, "Internal Server Error", 500)
-	// }
+	app.renderTemplate(w, "home")
 }
 
-func bugView(w http.ResponseWriter, r *http.Request) {
+func (app *application) bugView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil || id < 1 {
-		http.NotFound(w, r)
+		app.NotFound(w)
 		return
 	}
 	fmt.Fprintf(w, "Display bug with ID %d...", id)
 }
 
-func bugCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) bugCreate(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
 		w.Header().Set("Allow", http.MethodPost)
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		app.clientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 	w.Write([]byte("Create a new bug\n"))

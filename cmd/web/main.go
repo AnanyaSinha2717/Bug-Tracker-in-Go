@@ -4,7 +4,13 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
+
+type application struct {
+	errlog  *log.Logger
+	infolog *log.Logger
+}
 
 func main() {
 	// cmd line flag, completely optional
@@ -12,14 +18,22 @@ func main() {
 
 	flag.Parse()
 
-	mux := http.NewServeMux()
-	// fileServer := http.FileServer(http.Dir("./ui/html/base.tmpl.html/"))
-	// mux.Handle("/base.tmpl.html/", http.StripPrefix("/base.tmpl.html", fileServer))
-	mux.HandleFunc("/", home)
-	mux.HandleFunc("/bug/view/", bugView)
-	mux.HandleFunc("/bug/create/", bugCreate) 
+	infolog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errlog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	log.Printf("Starting server on: %s", *addr)
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
+	app := &application{
+		errlog: errlog,
+		infolog:  infolog,
+	}
+
+
+	srv := &http.Server{
+		Addr:     *addr,
+		ErrorLog: errlog,
+		Handler:  app.routes(),
+	}
+
+	infolog.Printf("Starting server on: %s", *addr)
+	err := srv.ListenAndServe()
+	errlog.Fatal(err)
 }
